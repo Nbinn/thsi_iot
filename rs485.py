@@ -27,14 +27,14 @@ def mqtt_recv_message(client, userdata, message):
     #TODO: Update the cmd to control 2 devices
     try:
         jsonobj = json.loads(message.payload)
-        if jsonobj['method'] == "setLED":
+        if jsonobj['method'] == "setRelay1":
             temp_data['relay1'] = jsonobj['params']
             # client.publish('v1/devices/me/attributes', json.dumps(temp_data), 1)
             if temp_data['relay1']:
                 setDevice1(True) 
             else:
                 setDevice1(False) 
-        if jsonobj['method'] == "relay2":
+        if jsonobj['method'] == "setRelay2":
             temp_data['relay2'] = jsonobj['params']
             # client.publish('v1/devices/me/attributes', json.dumps(temp_data), 1)
             # if temp_data['valueFAN']:
