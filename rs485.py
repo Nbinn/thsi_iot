@@ -10,9 +10,9 @@ MQTT_SERVER = "mqtt.ohstem.vn"
 MQTT_PORT = 1883
 MQTT_USERNAME = "testing12345"
 MQTT_PASSWORD = ""
-MQTT_TOPIC_PUB_TEMP = MQTT_USERNAME + "/temp"
-MQTT_TOPIC_PUB_MOIS = MQTT_USERNAME + "/mois"
-MQTT_TOPIC_SUB = MQTT_USERNAME + "/control"
+MQTT_TOPIC_PUB_TEMP = MQTT_USERNAME + "/feeds/V1/mois/"
+MQTT_TOPIC_PUB_MOIS = MQTT_USERNAME + "/feeds/V1/temp/"
+MQTT_TOPIC_SUB = MQTT_USERNAME + "/feeds/V1/control"
 
 def mqtt_connected(client, userdata, flags, rc):
     print("Connected succesfully!!")
