@@ -3,16 +3,16 @@ print("Sensors and Actuators")
 import time
 import serial.tools.list_ports
 import paho.mqtt.client as mqtt
+import json
 
 
-
-MQTT_SERVER = "mqtt.ohstem.vn"
+MQTT_SERVER = "demo.thingsboard.io"
 MQTT_PORT = 1883
-MQTT_USERNAME = "testing12345"
-MQTT_PASSWORD = ""
-MQTT_TOPIC_PUB_TEMP = MQTT_USERNAME + "/feeds/V1/mois/"
-MQTT_TOPIC_PUB_MOIS = MQTT_USERNAME + "/feeds/V1/temp/"
-MQTT_TOPIC_SUB = MQTT_USERNAME + "/feeds/V1/control"
+MQTT_ACCESS_TOKEN = "MNUrel9MvIV2iXce3LA1"
+# MQTT_PASSWORD = ""
+# MQTT_TOPIC_PUB_TEMP = MQTT_USERNAME + "/feeds/V1/mois/"
+MQTT_TOPIC_PUB = "v1/devices/me/telemetry"
+MQTT_TOPIC_SUB = "v1/devices/me/rpc/request/+"
 
 def mqtt_connected(client, userdata, flags, rc):
     print("Connected succesfully!!")
@@ -23,9 +23,29 @@ def mqtt_subscribed(client, userdata, mid, granted_qos):
 
 def mqtt_recv_message(client, userdata, message):
     print("Received: ", message.payload.decode("utf-8"))
+    temp_data = {'value': True}
+    #TODO: Update the cmd to control 2 devices
+    try:
+        jsonobj = json.loads(message.payload)
+        if jsonobj['method'] == "setLED":
+            temp_data['relay1'] = jsonobj['params']
+            # client.publish('v1/devices/me/attributes', json.dumps(temp_data), 1)
+            if temp_data['relay1']:
+                setDevice1(True) 
+            else:
+                setDevice1(False) 
+        if jsonobj['method'] == "relay2":
+            temp_data['relay2'] = jsonobj['params']
+            # client.publish('v1/devices/me/attributes', json.dumps(temp_data), 1)
+            # if temp_data['valueFAN']:
+                # setDevice2(True) 
+            # else:
+                # setDevice2(False) 
+    except:
+        pass
 
 mqttClient = mqtt.Client()
-mqttClient.username_pw_set(MQTT_USERNAME, MQTT_PASSWORD)
+mqttClient.username_pw_set(MQTT_ACCESS_TOKEN)
 mqttClient.connect(MQTT_SERVER, int(MQTT_PORT), 60)
 
 mqttClient.on_connect = mqtt_connected
@@ -53,7 +73,7 @@ print(portName)
 
 
 try:
-    ser = serial.Serial(port=portName, baudrate=115200)
+    ser = serial.Serial(port=portName, baudrate=9600)
     print("Open successfully")
 except:
     print("Can not open the port")
@@ -97,10 +117,14 @@ def readMoisture():
     time.sleep(1)
     return serial_read_data(ser)
 
-
+temp = 10
+mois = 10
 while True:
     print("TEST SENSOR")
-    mqttClient.publish(MQTT_TOPIC_PUB_TEMP,readTemperature())
-    time.sleep(1)
-    mqttClient.publish(MQTT_TOPIC_PUB_MOIS,readMoisture())
-    time.sleep(1)
+    # mqttClient.publish(MQTT_TOPIC_PUB_TEMP,readTemperature())
+    time.sleep(10)
+    # temp = readTemperature()
+    # mois = readMoisture()
+    collect_data = {'temperature': temp, 'humidity': mois}
+    mqttClient.publish(MQTT_TOPIC_PUB,json.dumps(collect_data))
+    # time.sleep(1)
